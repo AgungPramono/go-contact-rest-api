@@ -8,8 +8,9 @@ import (
 )
 
 type Handler struct {
-	UserController controller.UserController
-	AuthController controller.AuthController
+	UserController    controller.UserController
+	AuthController    controller.AuthController
+	ContactController controller.ContactController
 }
 
 func SetupRouter(app *fiber.App, h *Handler, service service.UserService) {
@@ -20,4 +21,6 @@ func SetupRouter(app *fiber.App, h *Handler, service service.UserService) {
 	api.Patch("/users/current", h.UserController.Update)
 	api.Get("/users/current", h.UserController.Get)
 	api.Delete("/auth/logout", h.AuthController.Logout)
+	api.Post("/contacts", h.ContactController.Create)
+	api.Get("/contacts/:id", h.ContactController.GetContact)
 }

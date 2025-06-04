@@ -1,9 +1,10 @@
-package helper
+package config
 
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"time"
 )
 
 const (
@@ -21,6 +22,18 @@ func ConnectDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Ambil instance SQL dari GORM
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	// Setting connection pool
+	sqlDB.SetMaxOpenConns(80)                  // Maks koneksi aktif
+	sqlDB.SetMaxIdleConns(25)                  // Maks koneksi idle
+	sqlDB.SetConnMaxIdleTime(10 * time.Minute) // Waktu koneksi idle sebelum dibuang
+	sqlDB.SetConnMaxLifetime(1 * time.Hour)    // Waktu maksimal hidupnya koneksi
 	//
 	//db.AutoMigrate(&model.User{})
 	return db, nil
