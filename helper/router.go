@@ -23,4 +23,6 @@ func SetupRouter(app *fiber.App, h *Handler, service service.UserService) {
 	api.Delete("/auth/logout", h.AuthController.Logout)
 	api.Post("/contacts", h.ContactController.Create)
 	api.Get("/contacts/:id", h.ContactController.GetContact)
+	api.Put("/contacts/:id", h.ContactController.Update)
+	api.Delete("/contacts/:id", h.ContactController.Delete)
 }
