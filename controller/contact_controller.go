@@ -6,6 +6,7 @@ import (
 	"go-contact-rest-api/service"
 	"go-contact-rest-api/web"
 	"go-contact-rest-api/web/request"
+	"strconv"
 )
 
 type ContactController struct {
@@ -97,4 +98,43 @@ func (controller *ContactController) Delete(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data": "OK",
 	})
+}
+
+func (controller *ContactController) SearchContact(c *fiber.Ctx) error {
+	user := c.Locals("user").(*model.User)
+
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	if size < 1 {
+		size = 5
+	}
+	searchRequest := request.SearchContactRequest{
+		Name:  c.Params("name"),
+		Email: c.Params("email"),
+		Phone: c.Params("phone"),
+		Page:  page,
+		Size:  size,
+	}
+	if err := c.QueryParser(&searchRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	contacts, paging, err := controller.ContactService.SearchContacts(user, searchRequest)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+	response := web.ApiResponse{
+		Data:   contacts,
+		Paging: &paging,
+	}
+	return c.Status(fiber.StatusOK).JSON(response)
 }

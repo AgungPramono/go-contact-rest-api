@@ -1,14 +1,15 @@
-package repository
+package impl
 
 import (
 	"go-contact-rest-api/model"
+	"go-contact-rest-api/repository"
 	"gorm.io/gorm"
 )
 
 type UserRepositoryImpl struct {
 }
 
-func NewUserRepository() UserRepository {
+func NewUserRepository() repository.UserRepository {
 	return &UserRepositoryImpl{}
 }
 

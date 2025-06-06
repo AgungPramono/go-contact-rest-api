@@ -1,10 +1,10 @@
 package model
 
 type User struct {
-	Username       string    `gorm:"primary_key:column:username"`
-	Password       string    `gorm:"column:password"`
-	Name           string    `gorm:"column:name"`
-	Token          *string   `gorm:"column:token;unique"`
-	TokenExpiredAt int64     `gorm:"column:token_expired_at"`
-	Contacts       []Contact `gorm:"foreignKey:Username;references:Username"`
+	Username       string  `gorm:"primaryKey;column:username"` // Primary Key
+	Password       string  `gorm:"column:password"`            // Password
+	Name           string  `gorm:"column:name"`                // Name
+	Token          *string `gorm:"column:token;unique"`        // Token (unique constraint)
+	TokenExpiredAt int64   `gorm:"column:token_expired_at"`    // Token expiration timestamp
+	//Contacts       []Contact `gorm:"foreignKey:Username;references:Username"` // One-to-Many with Contact
 }

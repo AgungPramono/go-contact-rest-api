@@ -35,6 +35,7 @@ func ConnectDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxIdleTime(10 * time.Minute) // Waktu koneksi idle sebelum dibuang
 	sqlDB.SetConnMaxLifetime(1 * time.Hour)    // Waktu maksimal hidupnya koneksi
 	//
-	//db.AutoMigrate(&model.User{})
+	//db.AutoMigrate(&model.User{}, &model.Contact{}, &model.Address{})
+
 	return db, nil
 }

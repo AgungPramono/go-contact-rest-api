@@ -1,10 +1,10 @@
 package request
 
 type CreateAddressRequest struct {
-	ContactID  string `json:"_;validate:required"`
-	Street     string `json:"street;validate:max=100"`
-	City       string `json:"city;validate:max=100"`
-	Province   string `json:"province;validate:max=100"`
-	Country    string `json:"country;validate:required;max=100"`
-	PostalCode string `json:"postal_code;validate:max=100"`
+	ContactID  string `validate:"required" json:"-"`
+	Street     string `validate:"max=200" json:"street"`
+	City       string `validate:"max=100" json:"city"`
+	Province   string `validate:"max=100" json:"province"`
+	Country    string `validate:"required,max=100" json:"country"`
+	PostalCode string `validate:"max=10" json:"postalCode"`
 }

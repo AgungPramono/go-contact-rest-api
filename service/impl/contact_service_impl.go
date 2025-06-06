@@ -8,9 +8,11 @@ import (
 	"go-contact-rest-api/model"
 	"go-contact-rest-api/repository"
 	"go-contact-rest-api/service"
+	"go-contact-rest-api/web"
 	"go-contact-rest-api/web/request"
 	"go-contact-rest-api/web/response"
 	"gorm.io/gorm"
+	"math"
 )
 
 type ContactServiceImpl struct {
@@ -35,7 +37,7 @@ func (contactService ContactServiceImpl) Create(user *model.User, request *reque
 	}
 
 	contact := model.Contact{
-		Id:        uuid.New().String(),
+		ID:        uuid.New().String(),
 		FirstName: request.FirstName,
 		LastName:  request.LastName,
 		Email:     request.Email,
@@ -53,7 +55,7 @@ func (contactService ContactServiceImpl) Create(user *model.User, request *reque
 
 func toContactResponse(contact model.Contact) (response.ContactResponse, error) {
 	return response.ContactResponse{
-		Id:        contact.Id,
+		Id:        contact.ID,
 		FirstName: contact.FirstName,
 		LastName:  contact.LastName,
 		Phone:     contact.Phone,
@@ -100,4 +102,37 @@ func (contactService ContactServiceImpl) Delete(user *model.User, id string) err
 		return fiber.NewError(fiber.StatusNotFound, "Contact not found")
 	}
 	return contactService.repository.Delete(id, contactService.DB)
+}
+
+func (contactService ContactServiceImpl) SearchContacts(user *model.User, search request.SearchContactRequest) ([]response.ContactResponse, web.PagingResponse, error) {
+	contactResult, total, err := contactService.repository.SearchContacts(
+		user,
+		search,
+		contactService.DB)
+
+	if err != nil {
+		return nil, web.PagingResponse{}, fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
+	}
+
+	var data []response.ContactResponse
+	for _, contact := range contactResult {
+		contactData := response.ContactResponse{
+			Id:        contact.ID,
+			FirstName: contact.FirstName,
+			LastName:  contact.LastName,
+			Phone:     contact.Phone,
+			Email:     contact.Email,
+		}
+		data = append(data, contactData)
+	}
+
+	totalPage := int(math.Ceil(float64(total) / float64(search.Size)))
+
+	Paging := web.PagingResponse{
+		CurrentPage: search.Page,
+		TotalPage:   totalPage,
+		Size:        search.Size,
+	}
+
+	return data, Paging, nil
 }
