@@ -8,6 +8,7 @@ import (
 	"go-contact-rest-api/model"
 	"go-contact-rest-api/repository"
 	"go-contact-rest-api/service"
+	"go-contact-rest-api/web"
 	"go-contact-rest-api/web/request"
 	"go-contact-rest-api/web/response"
 	"golang.org/x/crypto/bcrypt"
@@ -32,26 +33,26 @@ func NewUserService(repository repository.UserRepository, DB *gorm.DB, validate 
 	}
 }
 
-func (service UserServiceImpl) Register(request *request.RegisterUserRequest) error {
+func (service UserServiceImpl) Register(request *request.RegisterUserRequest) web.StatusResponse {
 
 	err2 := service.Validate.Struct(request)
 	if err2 != nil {
 		parseErr := app.ParseValidationErrors(err2)
-		return fiber.NewError(fiber.StatusBadRequest, parseErr)
+		return web.CreateResponse(fiber.StatusBadRequest, parseErr, nil, false)
 	}
 
 	_, err := service.repository.ExistById(request.Username, service.DB)
 	if err == nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Username already exist")
+		return web.CreateResponse(fiber.StatusBadRequest, "Username already exist", nil, false)
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
+		return web.CreateResponse(fiber.StatusInternalServerError, "Internal server error", nil, false)
 	}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
+		return web.CreateResponse(fiber.StatusInternalServerError, "Internal server error", nil, false)
 	}
 
 	user := model.User{
@@ -60,7 +61,11 @@ func (service UserServiceImpl) Register(request *request.RegisterUserRequest) er
 		Password: string(password),
 		Token:    nil,
 	}
-	return service.repository.Save(&user, service.DB)
+	err = service.repository.Save(&user, service.DB)
+	if err != nil {
+		return web.CreateResponse(fiber.StatusInternalServerError, "register user failed", nil, false)
+	}
+	return web.CreateResponse(fiber.StatusOK, nil, "OK", true)
 }
 
 func Get(user *model.User) response.UserResponse {

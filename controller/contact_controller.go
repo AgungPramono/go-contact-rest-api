@@ -28,9 +28,11 @@ func (controller *ContactController) Create(c *fiber.Ctx) error {
 	user := c.Locals("user").(*model.User)
 	contactResponse, err := controller.ContactService.Create(user, create)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		apiResponse := web.ApiResponse{
+			Errors: err.Error(),
+			Status: false,
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(apiResponse)
 	}
 
 	response := web.ApiResponse{
@@ -40,18 +42,21 @@ func (controller *ContactController) Create(c *fiber.Ctx) error {
 }
 
 func GetResponse(c *fiber.Ctx, err error) error {
-	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-		"error": err,
-	})
+	apiResponse := web.ApiResponse{
+		Status: false,
+		Errors: err.Error(),
+	}
+	return c.Status(fiber.StatusBadRequest).JSON(apiResponse)
 }
 
 func (controller *ContactController) GetContact(c *fiber.Ctx) error {
 	user := c.Locals("user").(*model.User)
 	contactResponse, err := controller.ContactService.Get(user, c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse := web.StatusResponse{
+			Errors: err.Error(),
+		}
+		return c.Status(fiber.StatusNotFound).JSON(statusResponse)
 	}
 
 	response := web.ApiResponse{
@@ -64,9 +69,10 @@ func (controller *ContactController) GetContact(c *fiber.Ctx) error {
 func (controller *ContactController) Update(c *fiber.Ctx) error {
 	updateRequest := &request.UpdateContactRequest{}
 	if err := c.BodyParser(&updateRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse := web.StatusResponse{
+			Errors: err.Error(),
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(statusResponse)
 	}
 
 	Id := c.Params("id")
@@ -74,9 +80,10 @@ func (controller *ContactController) Update(c *fiber.Ctx) error {
 	user := c.Locals("user").(*model.User)
 	contactResponse, err := controller.ContactService.Update(user, updateRequest)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse := web.StatusResponse{
+			Errors: err.Error(),
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(statusResponse)
 	}
 
 	response := web.ApiResponse{
@@ -88,16 +95,17 @@ func (controller *ContactController) Update(c *fiber.Ctx) error {
 func (controller *ContactController) Delete(c *fiber.Ctx) error {
 	Id := c.Params("id")
 	user := c.Locals("user").(*model.User)
+
+	statusResponse := web.StatusResponse{}
+	
 	err := controller.ContactService.Delete(user, Id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse.Errors = err.Error()
+		return c.Status(fiber.StatusBadRequest).JSON(statusResponse)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": "OK",
-	})
+	statusResponse.Data = "OK"
+	return c.Status(fiber.StatusOK).JSON(statusResponse)
 }
 
 func (controller *ContactController) SearchContact(c *fiber.Ctx) error {
@@ -120,17 +128,16 @@ func (controller *ContactController) SearchContact(c *fiber.Ctx) error {
 		Page:  page,
 		Size:  size,
 	}
+	statusResponse := web.StatusResponse{}
 	if err := c.QueryParser(&searchRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse.Errors = err.Error()
+		return c.Status(fiber.StatusBadRequest).JSON(statusResponse)
 	}
 
 	contacts, paging, err := controller.ContactService.SearchContacts(user, searchRequest)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err,
-		})
+		statusResponse.Errors = err.Error()
+		return c.Status(fiber.StatusBadRequest).JSON(statusResponse)
 	}
 	response := web.ApiResponse{
 		Data:   contacts,

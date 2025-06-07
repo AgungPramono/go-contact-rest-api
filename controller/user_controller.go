@@ -31,19 +31,7 @@ func (usrController *UserController) Register(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response)
 	}
 
-	err = usrController.UserService.Register(registerUserRequest)
-	if err != nil {
-		response := web.ApiResponse{
-			Status:  false,
-			Message: "Register failed",
-			Errors:  err.Error(),
-		}
-		return ctx.Status(fiber.StatusBadRequest).JSON(response)
-	}
-
-	response := web.ApiResponse{
-		Data: "OK",
-	}
+	response := usrController.UserService.Register(registerUserRequest)
 
 	return ctx.Status(fiber.StatusOK).JSON(response)
 }

@@ -32,7 +32,10 @@ func (ac *AuthController) Login(ctx *fiber.Ctx) error {
 
 	tokenResponse, err := ac.AuthService.Login(&loginRequest)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(err.Error())
+		apiResponse := web.ApiResponse{
+			Errors: err.Error(),
+		}
+		return ctx.Status(fiber.StatusUnauthorized).JSON(apiResponse)
 	}
 	response := web.ApiResponse{
 		Data: tokenResponse,
@@ -44,7 +47,11 @@ func (ac *AuthController) Logout(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*model.User)
 	err := ac.AuthService.Logout(user)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(err.Error())
+		apiResponse := web.ApiResponse{
+			Status: false,
+			Errors: err.Error(),
+		}
+		return ctx.Status(fiber.StatusBadRequest).JSON(apiResponse)
 	}
 	response := web.ApiResponse{
 		Data: "OK",

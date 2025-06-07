@@ -23,25 +23,6 @@ func (r *AddressRepositoryImpl) Delete(id string, db *gorm.DB) error {
 	return db.Delete(&model.Address{}, "id = ?", id).Error
 }
 
-func (r *AddressRepositoryImpl) FindAll(user *model.User, db *gorm.DB) ([]*model.Address, error) {
-	var addresses []*model.Address
-	err := db.Where("username = ?", user.Username).Find(&addresses).Error
-	if err != nil {
-		return nil, err
-	}
-	return addresses, nil
-}
-
-func (r *AddressRepositoryImpl) FindById(id string, db *gorm.DB) (*model.Address, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *AddressRepositoryImpl) FindByUserId(user *model.User, id string, db *gorm.DB) (*model.Address, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (r *AddressRepositoryImpl) FindAllByContactId(contactId string, db *gorm.DB) ([]*model.Address, error) {
 	var addresses []*model.Address
 	err := db.Where("contact_id = ?", contactId).Find(&addresses).Error
